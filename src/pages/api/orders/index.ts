@@ -2,7 +2,7 @@
 import type {NextFetchEvent, NextRequest} from "next/server";
 import { Pool } from "@neondatabase/serverless";
 import {json} from "stream/consumers";
-import zod, {string} from "zod";
+import zod, {array, string} from "zod";
 import sqlstring from "sqlstring";
 import {extractBody} from "@/utilities/extractBody";
 
@@ -13,10 +13,20 @@ runtime:"edge",
 
 
 const schema=zod.object({
-    category:string().max(64).min(1),
-    name:string().max(64).min(1),
-    price:string().max(64).min(1),
-    image:string().max(64).min(1),
+
+    // id:string().max(512).min(1),
+    count:string().max(64).min(1),
+    sum:string().max(64).min(1),
+    items: array(string()),
+    fullname:string().max(64).min(1),
+    mobile:string().max(64).min(1),
+    // items: zod.object({
+    //     id: zod.string(),
+    //     name: zod.string(),
+    //     price: zod.string(),
+    //     count: zod.string(),
+    // }
+
 })
 async function SetMethod(req: NextRequest, event: NextFetchEvent){
     const EBody =await extractBody(req);
@@ -25,20 +35,36 @@ async function SetMethod(req: NextRequest, event: NextFetchEvent){
             status: 200,
         });
     }
+    console.log("EBody",EBody)
     //generate uuid in posgressDb : (uuid_in(md5(random()::text || random()::text)::cstring)
     try {
-        const {category,name,price,image}=(EBody);
+        const {count,sum,items,fullname,mobile}=schema.parse(EBody);
+        console.log("fullname",fullname);
+        console.log("items",items);
         const pool = new Pool({
             connectionString: process.env.DATABASE_URL,
         })
+       //  const sql =sqlstring.format(`
+       // INSERT INTO orders (id,count,sum,items,fullname,mobile)
+       //  VALUES (
+       //  uuid_in(md5(random()::text || random()::text)::cstring),
+       //    ?,?,
+       //  ARRAY[?],?
+       //  );
+       //  `,[
+       //          count,sum,items,fullname,mobile
+       //      ]
+       //  );
         const sql =sqlstring.format(`
-        INSERT INTO Products (id,category,name,price,image)
-        VALUES (uuid_in(md5(random()::text || random()::text)::cstring),?,?,?,?);
-       `,[
-                category,name,price,image
+       INSERT INTO orders (id,count,sum,items,fullname,mobile)
+        VALUES (
+        uuid_in(md5(random()::text || random()::text)::cstring
+        ),?,?,ARRAY [?],?,?);
+ 
+        `,[
+                count,sum,items,fullname,mobile
             ]
         );
-        console.log(sql)
         const {rows} = await pool.query(sql);
 
         event.waitUntil(pool.end());
@@ -63,7 +89,7 @@ async function getMethod(req: NextRequest, event: NextFetchEvent){
     })
 
     const sql = `
-        SELECT * from products;
+        SELECT id,count,sum,items,fullname,mobile,created_at FROM orders;
     `;
 
     const {rows} = await pool.query(sql);
@@ -78,8 +104,9 @@ async function getMethod(req: NextRequest, event: NextFetchEvent){
 }
 
 export default async function handler(req: NextRequest, event: NextFetchEvent) {
- if (req.method=="POST")
-     return SetMethod(req,event);
+ if (req.method=="POST") {
+     return SetMethod(req, event);
+ }
  else if (req.method=="GET")
      return getMethod(req,event)
 
@@ -87,3 +114,6 @@ export default async function handler(req: NextRequest, event: NextFetchEvent) {
         status: 200,
     });
 }
+
+
+
