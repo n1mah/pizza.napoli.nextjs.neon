@@ -25,7 +25,7 @@ async function SetMethod(req: NextRequest, event: NextFetchEvent){
             status: 200,
         });
     }
-
+    //generate uuid in posgressDb : (uuid_in(md5(random()::text || random()::text)::cstring)
     try {
         const {category,name,price,image}=(EBody);
         const pool = new Pool({
