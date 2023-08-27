@@ -78,7 +78,8 @@ async function getMethod(req: NextRequest, event: NextFetchEvent){
     })
 
     const sql = `
-        SELECT id,count,sum,items,fullname,mobile,created_at FROM orders;
+        SELECT id,count,sum,items,fullname,mobile,created_at FROM orders
+        ORDER BY created_at DESC;
     `;
 
     const {rows} = await pool.query(sql);
