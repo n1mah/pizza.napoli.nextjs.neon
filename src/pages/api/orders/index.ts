@@ -5,6 +5,7 @@ import {json} from "stream/consumers";
 import zod, {array, string} from "zod";
 import sqlstring from "sqlstring";
 import {extractBody} from "@/utilities/extractBody";
+import {v4 as uuidv4} from "uuid";
 
 export  const config={
 runtime:"edge",
@@ -14,7 +15,6 @@ runtime:"edge",
 
 const schema=zod.object({
 
-    // id:string().max(512).min(1),
     count:string().max(64).min(1),
     sum:string().max(64).min(1),
     items: array(string()),
@@ -36,47 +36,36 @@ async function SetMethod(req: NextRequest, event: NextFetchEvent){
         });
     }
     console.log("EBody",EBody)
-    //generate uuid in posgressDb : (uuid_in(md5(random()::text || random()::text)::cstring)
+
+    const id=uuidv4();
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+    })
     try {
         const {count,sum,items,fullname,mobile}=schema.parse(EBody);
-        console.log("fullname",fullname);
-        console.log("items",items);
-        const pool = new Pool({
-            connectionString: process.env.DATABASE_URL,
-        })
-       //  const sql =sqlstring.format(`
-       // INSERT INTO orders (id,count,sum,items,fullname,mobile)
-       //  VALUES (
-       //  uuid_in(md5(random()::text || random()::text)::cstring),
-       //    ?,?,
-       //  ARRAY[?],?
-       //  );
-       //  `,[
-       //          count,sum,items,fullname,mobile
-       //      ]
-       //  );
+
         const sql =sqlstring.format(`
        INSERT INTO orders (id,count,sum,items,fullname,mobile)
         VALUES (
-        uuid_in(md5(random()::text || random()::text)::cstring
-        ),?,?,ARRAY [?],?,?);
+        ?,?,?,ARRAY [?],?,?);
  
         `,[
-                count,sum,items,fullname,mobile
+                id,count,sum,items,fullname,mobile
             ]
         );
         const {rows} = await pool.query(sql);
 
-        event.waitUntil(pool.end());
         return new Response(
-            "insert successful - OK", {
+            "insert successful - id : "+id, {
                 status: 200,
             });
     }catch (e){
         return new Response(
-            "not valid", {
+            "Errors - Bad Request", {
                 status: 400,
             });
+    }finally {
+        event.waitUntil(pool.end());
     }
 
 }

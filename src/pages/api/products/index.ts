@@ -5,6 +5,7 @@ import {json} from "stream/consumers";
 import zod, {string} from "zod";
 import sqlstring from "sqlstring";
 import {extractBody} from "@/utilities/extractBody";
+import {v4 as uuidv4} from "uuid";
 
 export  const config={
 runtime:"edge",
@@ -25,12 +26,12 @@ async function SetMethod(req: NextRequest, event: NextFetchEvent){
             status: 200,
         });
     }
-    //generate uuid in posgressDb : (uuid_in(md5(random()::text || random()::text)::cstring)
+    const id=uuidv4();
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+    });
     try {
         const {category,name,price,image}=(EBody);
-        const pool = new Pool({
-            connectionString: process.env.DATABASE_URL,
-        })
         const sql =sqlstring.format(`
         INSERT INTO Products (id,category,name,price,image)
         VALUES (uuid_in(md5(random()::text || random()::text)::cstring),?,?,?,?);
@@ -38,10 +39,7 @@ async function SetMethod(req: NextRequest, event: NextFetchEvent){
                 category,name,price,image
             ]
         );
-        console.log(sql)
         const {rows} = await pool.query(sql);
-
-        event.waitUntil(pool.end());
         return new Response(
             "insert successful - OK", {
                 status: 200,
@@ -51,6 +49,8 @@ async function SetMethod(req: NextRequest, event: NextFetchEvent){
             "not valid", {
                 status: 400,
             });
+    }finally {
+        event.waitUntil(pool.end());
     }
 
 }
