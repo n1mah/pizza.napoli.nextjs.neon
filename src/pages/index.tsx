@@ -1,6 +1,20 @@
-import Image from 'next/image'
+import { useQuery } from "react-query";
 
-export default function Home() {
+const fetchProducts = async () => {
+  const res = await fetch("https://jsonplaceholder.typicode.com/users");
+  const result = await res.json();
+  return result;
+};
+
+
+type Product={
+  id:number;
+  name:string;
+  username:string;
+}
+export default function  Home() {
+  let products=fetchProducts() as Promise<any>;
+  console.log("data",products);
   return (
     <main className='max-w-sm mx-auto bg-pink-700'>
       <h1 className='text-center font-bold text-5xl'>Pizza Napoli</h1>
