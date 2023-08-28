@@ -58,7 +58,8 @@ export default function  Home() {
     },[]);
 
     useEffect(()=>{
-        cartItems
+        if(cartItems && cartItems.counter>0)
+            setProductLocal()
     },[cartItems]);
 
   const plusProduct=(product:any)=>{
@@ -66,20 +67,26 @@ export default function  Home() {
       if (cartItems && cartItems.items && cartItems.items.hasOwnProperty(product.id)){
         setCartItems((prev:any)=>(
             {
-              ...prev,
-              items: {
-                ...prev["items"],
-                [product.id]:[product.id,product.name,product.price,prev["items"][product.id][3]+1],
-              }
+                counter: ((prev && prev.counter)?prev.counter:0)+1,
+                total: ((prev && prev.total)?prev.total:0)+parseInt(product.price),
+                items: ((prev && prev["items"])?{
+                    ...prev["items"],
+                    [product.id]:[product.id,product.name,product.price,prev["items"][product.id][3]+1],
+                }:{
+                    [product.id]:[product.id,product.name,product.price,prev["items"][product.id][3]+1],
+                })
             }))
       }else {
         setCartItems((prev:any)=>(
             {
-              ...prev,
-              items: {
-                ...prev["items"],
-                [product.id]:[product.id,product.name,product.price,1],
-              }
+                counter: ((prev && prev.counter)?prev.counter:0) + 1,
+                total: ((prev && prev.total)?prev.total:0)+parseInt(product.price),
+                items: ((prev && prev["items"])?{
+                    ...prev["items"],
+                    [product.id]:[product.id,product.name,product.price,1],
+                }:{
+                    [product.id]:[product.id,product.name,product.price,1],
+                })
             }))
       }
 
@@ -114,7 +121,8 @@ export default function  Home() {
               // })
               setCartItems((prev:any)=>(
                   {
-                      ...prev,
+                      counter: prev.counter-1,
+                      total: prev.total-parseInt(product.price),
                       items: {
                           ...items
                       }
@@ -122,7 +130,8 @@ export default function  Home() {
           }else if (count>1){
               setCartItems((prev:any)=>(
                   {
-                      ...prev,
+                      counter: prev.counter-1,
+                      total: prev.total-parseInt(product.price),
                       items: {
                           ...prev["items"],
                           [product.id]:[product.id,product.name,product.price,count-1],
@@ -155,7 +164,9 @@ export default function  Home() {
     <main className='max-w-sm mx-auto bg-pink-700'>
       <h1 className='text-center font-bold text-5xl'>Pizza Napoli</h1>
       <h2 className='text-center font-bold text-3xl'>Menu</h2>
-      <button onClick={plusProduct}>Btn</button>
+      <button onClick={plusProduct}>Btn(</button>
+      <h3 className='text-center'>{(cartItems && cartItems.counter)?cartItems.counter:0 }</h3>
+      <h3 className='text-center'>{(cartItems && cartItems.total)?cartItems && cartItems.total:0}</h3>
       <div className='flex flex-col'>
       {pro && pro.rows &&
           pro.rows.map((value:any,key:number)=>(
