@@ -148,6 +148,28 @@ export default function  Home() {
               </div>
           ))
       }
+          {/*{cartItems && Object.keys(cartItems.items).map((key:any)=>(*/}
+          {/*        <div key={key} className='flex flex-col bg-blue-600 mt-2 py-2 w-10/12 mx-auto my-5 p-1'>*/}
+
+          {/*          <h3>{cartItems.items[key][1]}</h3>*/}
+          {/*          <h3>{cartItems.items[key][3]}</h3>*/}
+          {/*          /!*<span>{value[1]}</span>*!/*/}
+
+          {/*          /!*<span>{value[2]}</span>*!/*/}
+          {/*          /!*<span>{value[3]}</span>*!/*/}
+          {/*          /!*<div className='flex justify-center items-center'>*!/*/}
+          {/*          /!*  <div className='flex justify-center items-center'>*!/*/}
+          {/*          /!*    /!*<button className='w-6 h-6 flex justify-center items-center bg-slate-700 text-white rounded-full'>x</button>*!/*!/*/}
+          {/*          /!*    <button onClick={()=>{minisProduct(value)}} className='w-6 h-6 flex justify-center items-center bg-slate-700 text-white rounded-full'>-</button>*!/*/}
+          {/*          /!*    <span className='w-6 h-6 flex justify-center items-center bg-slate-700 text-white mx-2 rounded-full'>{CountProduct(value)}</span>*!/*/}
+          {/*          /!*    <button onClick={()=>{plusProduct(value)}} className='w-6 h-6 flex justify-center items-center bg-slate-700 text-white rounded-full'>+</button>*!/*/}
+          {/*          /!*  </div>*!/*/}
+          {/*          /!*  <h3 className='mx-2'>تعداد</h3>*!/*/}
+          {/*          /!*</div>*!/*/}
+
+          {/*        </div>*/}
+          {/*    ))*/}
+          {/*}*/}
 
       </div>
     </main>
