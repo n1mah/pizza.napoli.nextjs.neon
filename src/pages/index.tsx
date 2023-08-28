@@ -2,6 +2,7 @@
 import { useQuery } from "react-query";
 import axios from "axios";
 import {useEffect, useState} from "react";
+import {json} from "stream/consumers";
 
 
 
@@ -10,6 +11,11 @@ type Product={
   id:number;
   name:string;
   username:string;
+}
+type CART={
+    items:object,
+    counter:number,
+    total:number,
 }
 
 
@@ -29,9 +35,35 @@ export default function  Home() {
   const [cartItemsSum,setCartItemsSum]=useState<any>(0);
 
 
+    const setProductLocal=()=>{
+        localStorage.setItem("cartItems",JSON.stringify(cartItems));
+    }
+    const getProductLocal=()=>{
+        let a:any =localStorage.getItem("cartItems");
+        let data:any=JSON.parse(a)
+        console.log(a)
+        return (data);
+    }
+
+    useEffect(()=> {
+        // alert(getProductLocal())
+        if (init) {
+            fetchProducts();
+            setInit(false);
+        }
+
+        let g=getProductLocal();
+        console.dir(g)
+        setCartItems(getProductLocal());
+    },[]);
+
+    useEffect(()=>{
+        cartItems
+    },[cartItems]);
+
   const plusProduct=(product:any)=>{
     // if (!cartItems.items)
-      if (cartItems.items.hasOwnProperty(product.id)){
+      if (cartItems && cartItems.items && cartItems.items.hasOwnProperty(product.id)){
         setCartItems((prev:any)=>(
             {
               ...prev,
@@ -54,17 +86,15 @@ export default function  Home() {
     setCartItemCount((prev:any)=>{
       return prev + 1;
     })
+
   }
 
     const CountProduct=(product:any)=> {
-        if (cartItems.items.hasOwnProperty(product.id))
+        if (cartItems && cartItems.items && cartItems.items.hasOwnProperty(product.id))
             return cartItems.items[product.id][3];
         return 0;
     }
-  useEffect(()=>{
-    console.log(cartItems)
-    // console.log(cartItemCount)
-  },[cartItemCount]);
+
   const minisProduct=(product:any)=>{
       if (cartItems.items.hasOwnProperty(product.id)){
           let count = CountProduct(product);
@@ -115,10 +145,7 @@ export default function  Home() {
     // console.log(result.data)
     // console.log(result.data.rows[0].id)
   };
-  if (init) {
-    fetchProducts();
-    setInit(false);
-  }
+
   // let products=fetchProducts();
 
 
